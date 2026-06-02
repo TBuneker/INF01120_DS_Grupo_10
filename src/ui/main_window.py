@@ -17,8 +17,8 @@ class MainWindow(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
         self.title("Reprodutor Musical")
-        self.geometry("900x540")
-        self.minsize(780, 500)
+        self.geometry("1120x720")
+        self.minsize(980, 640)
 
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
@@ -29,14 +29,15 @@ class MainWindow(ctk.CTk):
         self._reprodutor = ReprodutorMusical()
         self._composicao_atual: ComposicaoMusical | None = None
         self._midi_temporario = Path(gettempdir()) / "gerador_fuga_texto.mid"
+        self._reproducao_pausada = False
 
         self._criar_layout()
 
     def _criar_layout(self) -> None:
         self.configure(fg_color="#f4f4f4")
-        self.grid_columnconfigure(0, weight=3)
-        self.grid_columnconfigure(1, weight=2)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=8, minsize=720)
+        self.grid_columnconfigure(1, weight=2, minsize=260)
+        self.grid_rowconfigure(1, weight=1, minsize=430)
 
         titulo = ctk.CTkLabel(
             self,
@@ -53,7 +54,7 @@ class MainWindow(ctk.CTk):
             border_color="#000000",
             corner_radius=0,
         )
-        area_texto.grid(row=1, column=0, padx=(22, 18), pady=(0, 8), sticky="nsew")
+        area_texto.grid(row=1, column=0, padx=(22, 12), pady=(0, 8), sticky="nsew")
         area_texto.grid_columnconfigure(0, weight=1)
         area_texto.grid_rowconfigure(1, weight=1)
 
@@ -73,6 +74,7 @@ class MainWindow(ctk.CTk):
             text_color="#000000",
             border_width=0,
             corner_radius=0,
+            height=390,
         )
         self._texto.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")
         self._texto.insert(
@@ -81,12 +83,12 @@ class MainWindow(ctk.CTk):
         )
 
         botoes_texto = ctk.CTkFrame(self, fg_color="transparent")
-        botoes_texto.grid(row=2, column=0, padx=(22, 18), pady=(0, 18), sticky="ew")
+        botoes_texto.grid(row=2, column=0, padx=(22, 12), pady=(0, 18), sticky="ew")
         botoes_texto.grid_columnconfigure(1, weight=1)
         self._criar_botao(
             botoes_texto, "Carregar arquivo(.txt)", self._carregar_texto, 0, width=150
         )
-        self._criar_botao(botoes_texto, "Salvar", self._salvar_texto, 2, width=96)
+        self._criar_botao(botoes_texto, "Salvar txt", self._salvar_texto, 2, width=110)
 
         painel_config = ctk.CTkFrame(
             self,
@@ -95,7 +97,7 @@ class MainWindow(ctk.CTk):
             border_color="#000000",
             corner_radius=0,
         )
-        painel_config.grid(row=1, column=1, padx=(14, 22), pady=(0, 8), sticky="new")
+        painel_config.grid(row=1, column=1, padx=(10, 22), pady=(0, 8), sticky="new")
         painel_config.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
@@ -105,38 +107,25 @@ class MainWindow(ctk.CTk):
             text_color="#000000",
         ).grid(row=0, column=0, padx=14, pady=(12, 4), sticky="ew")
 
-        self._bpm_entry = self._criar_campo_config(painel_config, "BPM:", "120", 1)
-        self._instrumento_entry = self._criar_campo_config(
-            painel_config, "Instrumento:", "6", 2
-        )
+        self._bpm_entry = self._criar_campo_config(painel_config, "BPM: [int]", "120", 1)
         self._volume_entry = self._criar_campo_config(
-            painel_config, "Volume:", "100", 3
+            painel_config, "Volume: [int]", "100", 2
         )
         self._oitava_entry = self._criar_campo_config(
-            painel_config, "Oitava padrao:", "6", 4
-        )
-
-        self._criar_botao(
-            painel_config,
-            "Salvar",
-            self._salvar_configuracoes,
-            0,
-            width=110,
-            linha=5,
-            pady=(10, 14),
+            painel_config, "Oitava padrao: [int]", "6", 3
         )
 
         acoes = ctk.CTkFrame(self, fg_color="transparent")
         acoes.grid(row=3, column=0, columnspan=2, padx=22, pady=(10, 4), sticky="ew")
-        for coluna in range(6):
+        for coluna in range(4):
             acoes.grid_columnconfigure(coluna, weight=1)
 
         self._criar_botao(acoes, "Gerar musica", self._gerar_musica, 0, width=140)
         self._criar_botao(acoes, "Salvar MIDI", self._salvar_midi, 1, width=140)
         self._criar_botao(acoes, "Reproduzir", self._reproduzir, 2, width=140)
-        self._criar_botao(acoes, "Pausar", self._pausar, 3, width=120)
-        self._criar_botao(acoes, "Retomar", self._retomar, 4, width=120)
-        self._criar_botao(acoes, "Parar", self._parar, 5, width=120)
+        self._pausar_retomar_button = self._criar_botao(
+            acoes, "Pausar", self._alternar_pausa_retomada, 3, width=140
+        )
 
         self._status = ctk.CTkLabel(
             self,
@@ -182,8 +171,8 @@ class MainWindow(ctk.CTk):
         width: int,
         linha: int = 0,
         pady: int | tuple[int, int] = 6,
-    ) -> None:
-        ctk.CTkButton(
+    ) -> ctk.CTkButton:
+        botao = ctk.CTkButton(
             pai,
             text=texto,
             command=comando,
@@ -196,7 +185,9 @@ class MainWindow(ctk.CTk):
             text_color="#000000",
             font=ctk.CTkFont(size=14, weight="bold"),
             corner_radius=0,
-        ).grid(row=linha, column=coluna, padx=6, pady=pady)
+        )
+        botao.grid(row=linha, column=coluna, padx=6, pady=pady)
+        return botao
 
     def _carregar_texto(self) -> None:
         caminho = filedialog.askopenfilename(
@@ -231,13 +222,6 @@ class MainWindow(ctk.CTk):
         except Exception as erro:
             self._mostrar_erro(erro)
 
-    def _salvar_configuracoes(self) -> None:
-        try:
-            self._ler_configuracoes()
-            self._definir_status("Configuracoes iniciais salvas.")
-        except Exception as erro:
-            self._mostrar_erro(erro)
-
     def _gerar_musica(self) -> None:
         try:
             self._composicao_atual = self._criar_composicao()
@@ -269,13 +253,23 @@ class MainWindow(ctk.CTk):
             if self._composicao_atual is None or not self._midi_temporario.exists():
                 self._gerar_musica()
             self._reprodutor.reproduzir(self._midi_temporario)
+            self._reproducao_pausada = False
+            self._pausar_retomar_button.configure(text="Pausar")
             self._definir_status("Reproducao iniciada.")
         except Exception as erro:
             self._mostrar_erro(erro)
 
+    def _alternar_pausa_retomada(self) -> None:
+        if self._reproducao_pausada:
+            self._retomar()
+        else:
+            self._pausar()
+
     def _pausar(self) -> None:
         try:
             self._reprodutor.pausar()
+            self._reproducao_pausada = True
+            self._pausar_retomar_button.configure(text="Retomar")
             self._definir_status("Reproducao pausada.")
         except Exception as erro:
             self._mostrar_erro(erro)
@@ -283,13 +277,11 @@ class MainWindow(ctk.CTk):
     def _retomar(self) -> None:
         try:
             self._reprodutor.retomar()
+            self._reproducao_pausada = False
+            self._pausar_retomar_button.configure(text="Pausar")
             self._definir_status("Reproducao retomada.")
         except Exception as erro:
             self._mostrar_erro(erro)
-
-    def _parar(self) -> None:
-        self._reprodutor.parar()
-        self._definir_status("Reproducao parada.")
 
     def _criar_composicao(self) -> ComposicaoMusical:
         config_global, config_voz = self._ler_configuracoes()
@@ -302,11 +294,10 @@ class MainWindow(ctk.CTk):
     def _ler_configuracoes(self) -> tuple[ConfiguracaoGlobal, ConfiguracaoVoz]:
         bpm = int(self._bpm_entry.get())
         volume = int(self._volume_entry.get())
-        instrumento = int(self._instrumento_entry.get())
         oitava = int(self._oitava_entry.get())
         config_global = ConfiguracaoGlobal(bpm_inicial=bpm)
         config_voz = ConfiguracaoVoz(
-            instrumento=instrumento,
+            instrumento=6,
             volume=volume,
             oitava=oitava,
         )
