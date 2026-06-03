@@ -1,0 +1,1 @@
+versao recomendada do Python: 3.12.x (por causa do pygame)
