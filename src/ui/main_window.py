@@ -77,10 +77,6 @@ class MainWindow(ctk.CTk):
             height=390,
         )
         self._texto.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")
-        self._texto.insert(
-            "1.0",
-            "[0] C D E F\n[4] G A H C\n[8] E F G A",
-        )
 
         botoes_texto = ctk.CTkFrame(self, fg_color="transparent")
         botoes_texto.grid(row=2, column=0, padx=(22, 12), pady=(0, 18), sticky="ew")
@@ -107,12 +103,12 @@ class MainWindow(ctk.CTk):
             text_color="#000000",
         ).grid(row=0, column=0, padx=14, pady=(12, 4), sticky="ew")
 
-        self._bpm_entry = self._criar_campo_config(painel_config, "BPM: [int]", "120", 1)
+        self._bpm_entry = self._criar_campo_config(painel_config, "BPM:", "120", 1)
         self._volume_entry = self._criar_campo_config(
-            painel_config, "Volume: [int]", "100", 2
+            painel_config, "Volume:", "100", 2
         )
         self._oitava_entry = self._criar_campo_config(
-            painel_config, "Oitava padrao: [int]", "6", 3
+            painel_config, "Oitava padrao:", "6", 3
         )
 
         acoes = ctk.CTkFrame(self, fg_color="transparent")
