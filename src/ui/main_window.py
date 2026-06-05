@@ -36,8 +36,7 @@ class MainWindow(ctk.CTk):
     def _criar_layout(self) -> None:
         self.configure(fg_color="#f4f4f4")
         self.grid_columnconfigure(0, weight=8, minsize=720)
-        self.grid_columnconfigure(1, weight=2, minsize=260)
-        self.grid_rowconfigure(1, weight=1, minsize=430)
+        self.grid_rowconfigure(1, weight=1, minsize=250)
 
         titulo = ctk.CTkLabel(
             self,
@@ -54,7 +53,7 @@ class MainWindow(ctk.CTk):
             border_color="#000000",
             corner_radius=0,
         )
-        area_texto.grid(row=1, column=0, padx=(22, 12), pady=(0, 8), sticky="nsew")
+        area_texto.grid(row=1, column=0, padx=(22, 22), pady=(0, 8), sticky="nsew")
         area_texto.grid_columnconfigure(0, weight=1)
         area_texto.grid_rowconfigure(1, weight=1)
 
@@ -79,12 +78,14 @@ class MainWindow(ctk.CTk):
         self._texto.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="nsew")
 
         botoes_texto = ctk.CTkFrame(self, fg_color="transparent")
-        botoes_texto.grid(row=2, column=0, padx=(22, 12), pady=(0, 18), sticky="ew")
-        botoes_texto.grid_columnconfigure(1, weight=1)
+        botoes_texto.grid(row=3, column=0, columnspan=2, padx=25, pady=(10, 4), sticky="ew")
+        for coluna in range(7):
+            botoes_texto.grid_columnconfigure(coluna, weight=1)
         self._criar_botao(
-            botoes_texto, "Carregar arquivo(.txt)", self._carregar_texto, 0, width=150
+            botoes_texto, "Carregar .txt", self._carregar_texto, 0, width=140
         )
-        self._criar_botao(botoes_texto, "Salvar txt", self._salvar_texto, 2, width=110)
+        self._criar_botao(botoes_texto, "Salvar .txt", self._salvar_texto, 1, width=140)
+        
 
         painel_config = ctk.CTkFrame(
             self,
@@ -93,12 +94,12 @@ class MainWindow(ctk.CTk):
             border_color="#000000",
             corner_radius=0,
         )
-        painel_config.grid(row=1, column=1, padx=(10, 22), pady=(0, 8), sticky="new")
+        painel_config.grid(row=2, column=0, padx=22, pady=(0, 8), sticky="ew")
         painel_config.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
             painel_config,
-            text="Configuracoes Iniciais",
+            text="Configurações Iniciais",
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color="#000000",
         ).grid(row=0, column=0, padx=14, pady=(12, 4), sticky="ew")
@@ -108,11 +109,11 @@ class MainWindow(ctk.CTk):
             painel_config, "Volume:", "100", 2
         )
         self._oitava_entry = self._criar_campo_config(
-            painel_config, "Oitava padrao:", "6", 3
+            painel_config, "Oitava padrão:", "6", 3
         )
 
         acoes = ctk.CTkFrame(self, fg_color="transparent")
-        acoes.grid(row=3, column=0, columnspan=2, padx=22, pady=(10, 4), sticky="ew")
+        acoes.grid(row=4, column=0, columnspan=2, padx=22, pady=(10, 4), sticky="ew")
         for coluna in range(4):
             acoes.grid_columnconfigure(coluna, weight=1)
 
@@ -130,7 +131,7 @@ class MainWindow(ctk.CTk):
             font=ctk.CTkFont(size=13),
             text_color="#111111",
         )
-        self._status.grid(row=4, column=0, columnspan=2, padx=22, pady=(0, 12), sticky="ew")
+        self._status.grid(row=5, column=0, columnspan=2, padx=22, pady=(0, 12), sticky="ew")
 
     def _criar_campo_config(
         self, pai: ctk.CTkFrame, rotulo: str, valor_inicial: str, linha: int
