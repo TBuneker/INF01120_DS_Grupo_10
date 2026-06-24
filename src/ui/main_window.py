@@ -89,12 +89,14 @@ class MainWindow(ctk.CTk):
 
         painel_config = ctk.CTkFrame(
             self,
+            width=360,
             fg_color="#b8b8b8",
             border_width=2,
             border_color="#000000",
             corner_radius=0,
         )
-        painel_config.grid(row=2, column=0, padx=22, pady=(0, 8), sticky="ew")
+        painel_config.grid(row=2, column=0, padx=22, pady=(0, 8), sticky="w")
+        painel_config.grid_propagate(False)
         painel_config.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
@@ -137,15 +139,15 @@ class MainWindow(ctk.CTk):
         self, pai: ctk.CTkFrame, rotulo: str, valor_inicial: str, linha: int
     ) -> ctk.CTkEntry:
         bloco = ctk.CTkFrame(pai, fg_color="transparent")
-        bloco.grid(row=linha, column=0, padx=18, pady=4, sticky="ew")
-        bloco.grid_columnconfigure(1, weight=1)
+        bloco.grid(row=linha, column=0, padx=18, pady=4)
         ctk.CTkLabel(
             bloco,
             text=rotulo,
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color="#111111",
-            anchor="w",
-        ).grid(row=0, column=0, sticky="w")
+            anchor="e",
+            width=150,
+        ).grid(row=0, column=0, sticky="e")
         campo = ctk.CTkEntry(
             bloco,
             width=98,
@@ -156,7 +158,7 @@ class MainWindow(ctk.CTk):
             corner_radius=0,
         )
         campo.insert(0, valor_inicial)
-        campo.grid(row=0, column=1, padx=(10, 0), sticky="e")
+        campo.grid(row=0, column=1, padx=(10, 0), sticky="w")
         return campo
 
     def _criar_botao(
