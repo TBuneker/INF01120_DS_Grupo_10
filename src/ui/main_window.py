@@ -119,10 +119,6 @@ class MainWindow(ctk.CTk):
         self._volume_entry = self._criar_campo_config(
             painel_config, "Volume:", "100", 2
         )
-        self._oitava_entry = self._criar_campo_config(
-            painel_config, "Oitava padrão:", "6", 3
-        )
-
         self._criar_painel_vozes()
 
         acoes = ctk.CTkFrame(self, fg_color="transparent")
@@ -310,12 +306,6 @@ class MainWindow(ctk.CTk):
             return configuracoes_atuais[indice]
 
         posicao = indice % len(OITAVAS_PADRAO)
-        if indice == 0:
-            try:
-                oitava_primeira_voz = int(self._oitava_entry.get())
-            except ValueError:
-                oitava_primeira_voz = OITAVAS_PADRAO[posicao]
-            return INSTRUMENTOS_PADRAO[posicao], oitava_primeira_voz
         return INSTRUMENTOS_PADRAO[posicao], OITAVAS_PADRAO[posicao]
 
     def _obter_configuracoes_vozes(self) -> list[tuple[int, int]]:
