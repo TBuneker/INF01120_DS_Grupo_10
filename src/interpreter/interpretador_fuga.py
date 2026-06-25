@@ -18,16 +18,20 @@ class InterpretadorFuga:
         texto: str,
         configuracao_global: ConfiguracaoGlobal | None = None,
         configuracao_primeira_voz: ConfiguracaoVoz | None = None,
+        configuracoes_vozes: list[ConfiguracaoVoz] | None = None,
     ) -> ComposicaoMusical:
         config_global = configuracao_global or ConfiguracaoGlobal()
         config_global.validar()
         composicao = ComposicaoMusical(configuracao_global=config_global)
 
         linhas = texto.splitlines() or [""]
-        for indice, linha in enumerate(linhas):
+        for linha in linhas:
             if linha == "" and len(linhas) > 1:
                 continue
-            config_voz = self._criar_configuracao_voz(indice, configuracao_primeira_voz)
+            indice = len(composicao.vozes)
+            config_voz = self._criar_configuracao_voz(
+                indice, configuracao_primeira_voz, configuracoes_vozes
+            )
             voz = self._interpretador_voz.interpretar(
                 linha=linha,
                 indice_voz=indice,
@@ -39,8 +43,19 @@ class InterpretadorFuga:
         return composicao
 
     def _criar_configuracao_voz(
-        self, indice: int, configuracao_primeira_voz: ConfiguracaoVoz | None
+        self,
+        indice: int,
+        configuracao_primeira_voz: ConfiguracaoVoz | None,
+        configuracoes_vozes: list[ConfiguracaoVoz] | None = None,
     ) -> ConfiguracaoVoz:
+        if configuracoes_vozes is not None and indice < len(configuracoes_vozes):
+            configuracao_voz = configuracoes_vozes[indice]
+            configuracao_voz.validar()
+            return ConfiguracaoVoz(
+                instrumento=configuracao_voz.instrumento,
+                volume=configuracao_voz.volume,
+                oitava=configuracao_voz.oitava,
+            )
         if indice == 0 and configuracao_primeira_voz is not None:
             configuracao_primeira_voz.validar()
             return ConfiguracaoVoz(
